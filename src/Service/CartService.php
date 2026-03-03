@@ -5,6 +5,8 @@ namespace App\Service;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+// Service métier du panier.
+// Toute la logique panier est centralisée ici pour garder les contrôleurs simples.
 class CartService
 {
     private const CART_KEY = 'cart';
@@ -17,10 +19,12 @@ class CartService
 
     public function add(int $productId, string $size): void
     {
+        // Panier stocké en session: persiste tant que la session utilisateur est active.
         $session = $this->requestStack->getSession();
         $cart = $session->get(self::CART_KEY, []);
         $key = $this->buildKey($productId, $size);
 
+        // Chaque combinaison produit+t﻿aille a sa propre ligne.
         if (!isset($cart[$key])) {
             $cart[$key] = [
                 'productId' => $productId,
@@ -31,6 +35,7 @@ class CartService
 
         $cart[$key]['quantity']++;
 
+        // Écriture finale en session.
         $session->set(self::CART_KEY, $cart);
     }
 
@@ -58,6 +63,7 @@ class CartService
         $cart = $session->get(self::CART_KEY, []);
         $details = [];
 
+        // On enrichit la session brute avec les infos produit venant de la base.
         foreach ($cart as $lineKey => $line) {
             $product = $this->productRepository->find($line['productId']);
 
@@ -78,6 +84,7 @@ class CartService
 
     public function getTotal(): float
     {
+        // Total calculé dynamiquement à partir des lignes détaillées.
         $total = 0;
 
         foreach ($this->getDetailedItems() as $item) {
@@ -89,6 +96,7 @@ class CartService
 
     private function buildKey(int $productId, string $size): string
     {
+        // Clé stable de ligne panier, ex: "12-M".
         return $productId.'-'.$size;
     }
 }

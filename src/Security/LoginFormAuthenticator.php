@@ -15,6 +15,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
+// Authenticator du formulaire de connexion.
+// Il transforme les données du formulaire en "Passport" de sécurité Symfony.
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
@@ -29,12 +31,14 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     {
         $email = (string) $request->request->get('email', '');
 
+        // Sert à pré-remplir l'email en cas d'échec de connexion.
         $request->getSession()->set('_security.last_username', $email);
 
         return new Passport(
             new UserBadge($email),
             new PasswordCredentials((string) $request->request->get('password', '')),
             [
+                // Protection CSRF du formulaire login.
                 new CsrfTokenBadge('authenticate', (string) $request->request->get('_csrf_token')),
                 new RememberMeBadge(),
             ]
@@ -43,10 +47,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
+        // Si l'utilisateur voulait une page protégée, on le renvoie dessus.
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
+        // Sinon, retour sur l'accueil.
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 

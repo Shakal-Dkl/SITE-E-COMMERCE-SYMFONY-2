@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+// Contrôleur panier / commande.
+// Il orchestre le parcours d'achat: panier -> création commande -> paiement.
 class CartController extends AbstractController
 {
     #[Route('/cart', name: 'app_cart')]
@@ -28,6 +30,7 @@ class CartController extends AbstractController
     #[Route('/cart/remove/{lineKey}', name: 'app_cart_remove', methods: ['POST'])]
     public function remove(string $lineKey, Request $request, CartService $cartService): RedirectResponse
     {
+        // Protection CSRF sur la suppression d'une ligne du panier.
         if ($this->isCsrfTokenValid('remove_'.$lineKey, (string) $request->request->get('_token'))) {
             $cartService->remove($lineKey);
             $this->addFlash('success', 'Article retiré du panier.');
@@ -45,6 +48,7 @@ class CartController extends AbstractController
     ): RedirectResponse {
         $items = $cartService->getDetailedItems();
 
+        // Garde-fou: impossible de lancer un checkout avec un panier vide.
         if ($items === []) {
             $this->addFlash('error', 'Le panier est vide.');
 
@@ -52,9 +56,12 @@ class CartController extends AbstractController
         }
 
         $order = new CustomerOrder();
+        // L'utilisateur connecté devient le propriétaire de la commande.
         $order->setUser($this->getUser());
         $order->setTotal($cartService->getTotal());
 
+        // On fige les lignes de commande (nom, prix unitaire, taille, quantité).
+        // Cela évite que l'historique change si le produit est modifié plus tard.
         foreach ($items as $item) {
             $orderItem = new OrderItem();
             $orderItem->setProduct($item['product']);
@@ -68,6 +75,7 @@ class CartController extends AbstractController
         $entityManager->persist($order);
         $entityManager->flush();
 
+        // URLs absolues requises par Stripe pour retour succès/annulation.
         $successUrl = $this->generateUrl('app_cart_success', ['orderId' => $order->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         $cancelUrl = $this->generateUrl('app_cart', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -80,6 +88,7 @@ class CartController extends AbstractController
         $order->setStripeSessionId($checkout['sessionId']);
         $entityManager->flush();
 
+        // Redirection vers Stripe (ou vers la simulation en environnement local).
         return $this->redirect($checkout['checkoutUrl']);
     }
 
@@ -88,11 +97,13 @@ class CartController extends AbstractController
     {
         $order = $entityManager->getRepository(CustomerOrder::class)->find($orderId);
 
+        // En mode démo, on marque la commande payée au retour "success".
         if ($order) {
             $order->setStatus('paid');
             $entityManager->flush();
         }
 
+        // Une fois la commande finalisée, on vide le panier session.
         $cartService->clear();
         $this->addFlash('success', 'Commande finalisée avec succès.');
 

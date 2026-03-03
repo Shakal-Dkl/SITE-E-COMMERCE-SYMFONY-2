@@ -4,6 +4,8 @@ namespace App\Service;
 
 use Stripe\StripeClient;
 
+// Service d'intégration Stripe.
+// Il propose un mode simulation pratique en local et un mode réel en test/production.
 class StripeService
 {
     public function __construct(private readonly string $stripeSecretKey)
@@ -17,6 +19,7 @@ class StripeService
      */
     public function startCheckout(array $items, string $successUrl, string $cancelUrl): array
     {
+        // En démo, on évite un appel réseau Stripe et on simule un retour succès.
         if ($this->isSimulationMode()) {
             return [
                 'checkoutUrl' => $successUrl.'?simulated=1',
@@ -28,6 +31,7 @@ class StripeService
         $stripe = new StripeClient($this->stripeSecretKey);
         $lineItems = [];
 
+        // Construction des lignes attendues par l'API Stripe Checkout.
         foreach ($items as $item) {
             $product = $item['product'];
 
@@ -59,6 +63,7 @@ class StripeService
 
     private function isSimulationMode(): bool
     {
+        // Convention projet: clé vide ou "***" = mode simulation.
         return $this->stripeSecretKey === '' || str_contains($this->stripeSecretKey, '***');
     }
 }

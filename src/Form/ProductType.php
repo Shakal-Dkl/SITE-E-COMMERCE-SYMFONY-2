@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+// Formulaire produit utilisé dans le back-office (création + édition).
 class ProductType extends AbstractType
 {
     public function __construct(private readonly KernelInterface $kernel)
@@ -23,6 +24,7 @@ class ProductType extends AbstractType
             ->add('price', null, [
                 'label' => 'Prix',
             ])
+            // Le champ image propose les fichiers réellement présents dans public/images/products.
             ->add('imagePath', ChoiceType::class, [
                 'label' => 'Image produit',
                 'required' => false,
@@ -55,6 +57,7 @@ class ProductType extends AbstractType
         $imagesDirectory = $this->kernel->getProjectDir().'/public/images/products';
         $files = glob($imagesDirectory.'/*.{jpg,jpeg,png,webp}', GLOB_BRACE);
 
+        // Si aucun fichier image n'existe, la liste reste vide.
         if ($files === false || $files === []) {
             return [];
         }
@@ -64,6 +67,7 @@ class ProductType extends AbstractType
 
         foreach ($files as $file) {
             $fileName = basename($file);
+            // Clé affichée dans la liste / valeur enregistrée en base.
             $choices[$fileName] = 'images/products/'.$fileName;
         }
 
