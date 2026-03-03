@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panier{% endblock %}
+
+{% block body %}
+    <section>
+        {% for lineKey, item in items %}
+            <article class="cart-item">
+                <div class="product-image" style="height:110px;">Image</div>
+                <div>
+                    <div><strong>{{ item.product.name }}</strong></div>
+                    <div>Taille : {{ item.size }}</div>
+                    <div>Prix unitaire : {{ item.product.price|number_format(2, ',', ' ') }} €</div>
+                    <div>Quantité : {{ item.quantity }}</div>
+                </div>
+                <form method="post" action="{{ path('app_cart_remove', {lineKey: lineKey}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('remove_' ~ lineKey) }}">
+                    <button class="btn" type="submit">RETIRER DU PANIER</button>
+                </form>
+            </article>
+        {% else %}
+            <p>Ton panier est vide.</p>
+        {% endfor %}
+
+        <div class="cart-summary">
+            <div class="btn">TOTAL : {{ total|number_format(2, ',', ' ') }} €</div>
+            <form method="post" action="{{ path('app_cart_checkout') }}">
+                <button class="btn" type="submit">FINALISER MA COMMANDE</button>
+            </form>
+            <a class="btn" href="{{ path('app_products') }}">CONTINUER MES ACHATS</a>
+        </div>
+    </section>
+{% endblock %}

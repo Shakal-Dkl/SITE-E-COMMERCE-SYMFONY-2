@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Boutique{% endblock %}
+
+{% block body %}
+    <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;">
+        <aside class="product-card">
+            <h3>Fourchette de prix</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
+                <li><a class="btn" href="{{ path('app_products') }}">Tout</a></li>
+                <li><a class="btn" href="{{ path('app_products', {range: '10-29'}) }}">10 à 29 €</a></li>
+                <li><a class="btn" href="{{ path('app_products', {range: '29-35'}) }}">30 à 35 €</a></li>
+                <li><a class="btn" href="{{ path('app_products', {range: '35-50'}) }}">35 à 50 €</a></li>
+            </ul>
+        </aside>
+
+        <section class="grid-3">
+            {% for product in products %}
+                <article class="product-card">
+                    <div class="product-image">
+                        {% if product.imagePath %}
+                            <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" style="max-width:100%;max-height:100%;">
+                        {% else %}
+                            Image produit
+                        {% endif %}
+                    </div>
+                    <div class="product-meta">
+                        <div>
+                            <div>{{ product.name }}</div>
+                            <div>{{ product.price|number_format(2, ',', ' ') }} €</div>
+                        </div>
+                        <a class="btn" href="{{ path('app_product_show', {id: product.id}) }}">VOIR</a>
+                    </div>
+                </article>
+            {% else %}
+                <p>Aucun produit dans cette fourchette.</p>
+            {% endfor %}
+        </section>
+    </div>
+{% endblock %}

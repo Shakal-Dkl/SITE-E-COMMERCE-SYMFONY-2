@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Back-office{% endblock %}
+
+{% block body %}
+    <section class="product-card" style="margin-bottom:20px;">
+        <h2>Back-Office - Ajouter un sweat-shirt</h2>
+        {{ form_start(newProductForm) }}
+            <div class="admin-grid">
+                {{ form_row(newProductForm.name) }}
+                {{ form_row(newProductForm.price) }}
+                {{ form_row(newProductForm.stockXs) }}
+                {{ form_row(newProductForm.stockS) }}
+                {{ form_row(newProductForm.stockM) }}
+                {{ form_row(newProductForm.stockL) }}
+                {{ form_row(newProductForm.stockXl) }}
+                {{ form_row(newProductForm.imagePath) }}
+            </div>
+            <div class="form-row">{{ form_row(newProductForm.featured) }}</div>
+            <button class="btn" type="submit">AJOUTER</button>
+        {{ form_end(newProductForm) }}
+    </section>
+
+    {% for product in products %}
+        <article class="admin-row">
+            <strong>{{ product.name }}</strong> - {{ product.price|number_format(2, ',', ' ') }} €
+            <div style="margin-top:8px;display:flex;gap:8px;">
+                <a class="btn" href="{{ path('app_admin_product_edit', {id: product.id}) }}">MODIFIER</a>
+                <form method="post" action="{{ path('app_admin_product_delete', {id: product.id}) }}" onsubmit="return confirm('Supprimer ce produit ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
+                    <button class="btn" type="submit">SUPPRIMER</button>
+                </form>
+            </div>
+        </article>
+    {% else %}
+        <p>Aucun produit.</p>
+    {% endfor %}
+{% endblock %}

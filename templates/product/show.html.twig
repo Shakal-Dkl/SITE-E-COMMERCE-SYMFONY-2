@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produit{% endblock %}
+
+{% block body %}
+    <section class="product-card product-detail">
+        <div class="product-image" style="height:420px;">
+            {% if product.imagePath %}
+                <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" style="max-width:100%;max-height:100%;">
+            {% else %}
+                Image produit
+            {% endif %}
+        </div>
+
+        <div>
+            <h2>{{ product.name }}</h2>
+            <p><strong>Prix :</strong> {{ product.price|number_format(2, ',', ' ') }} €</p>
+
+            {{ form_start(addToCartForm) }}
+                <div class="form-row">{{ form_row(addToCartForm.size) }}</div>
+                <button class="btn" type="submit">AJOUTER AU PANIER</button>
+            {{ form_end(addToCartForm) }}
+        </div>
+    </section>
+{% endblock %}

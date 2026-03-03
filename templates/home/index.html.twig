@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil | Stubborn{% endblock %}
+
+{% block body %}
+    <section class="grid-3">
+        {% for product in featuredProducts %}
+            <article class="product-card">
+                <div class="product-image">
+                    {% if product.imagePath %}
+                        <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" style="max-width:100%;max-height:100%;">
+                    {% else %}
+                        Image produit
+                    {% endif %}
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <div>{{ product.name }}</div>
+                        <div>{{ product.price|number_format(2, ',', ' ') }} €</div>
+                    </div>
+                    {% if app.user %}
+                        <a class="btn" href="{{ path('app_product_show', {id: product.id}) }}">VOIR</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% else %}
+            <p>Aucun produit mis en avant.</p>
+        {% endfor %}
+    </section>
+{% endblock %}
