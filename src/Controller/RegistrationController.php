@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
+// Contrôleur d'inscription client + validation de l'email.
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
@@ -25,6 +26,7 @@ class RegistrationController extends AbstractController
         EntityManagerInterface $entityManager,
         EmailVerifier $emailVerifier,
     ): Response {
+        // Un utilisateur déjà connecté n'a pas besoin de repasser par l'inscription.
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
@@ -34,16 +36,19 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Le mot de passe est toujours hashé avant stockage en base.
             $user->setPassword($userPasswordHasher->hashPassword(
                 $user,
                 (string) $form->get('plainPassword')->getData()
             ));
 
+            // Dans le contexte de ce projet, un inscrit devient client par défaut.
             $user->setRoles(['ROLE_CLIENT']);
 
             $entityManager->persist($user);
             $entityManager->flush();
 
+            // Envoi de l'email de confirmation avec lien signé.
             $emailVerifier->sendEmailConfirmation('app_verify_email', $user, (new TemplatedEmail())
                 ->from(new Address('noreply@stubborn.local', 'Stubborn'))
                 ->to((string) $user->getEmail())
@@ -64,6 +69,7 @@ class RegistrationController extends AbstractController
     #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(Request $request, EntityManagerInterface $entityManager, EmailVerifier $emailVerifier): Response
     {
+        // L'ID est transporté dans l'URL signée.
         $id = $request->query->get('id');
 
         if ($id === null) {
@@ -77,6 +83,7 @@ class RegistrationController extends AbstractController
         }
 
         try {
+            // Vérifie signature + expiration, puis active le compte.
             $emailVerifier->handleEmailConfirmation($request, $user);
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('error', $exception->getReason());
