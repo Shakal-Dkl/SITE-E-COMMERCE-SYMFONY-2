@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Stubborn{% endblock %}</title>
+        <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
@@ -11,8 +12,11 @@
     <body>
         <header class="site-header">
             <div class="logo-wrap">
-                <div class="logo">Stubborn</div>
-                <div class="slogan">Slogan</div>
+                <div class="logo">
+                    <img class="logo-img" src="{{ asset('images/logo.png') }}" alt="Logo Stubborn" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="logo-text">Stubborn</span>
+                </div>
+                <div class="slogan">Don't compromise on your look</div>
             </div>
 
             {% set currentRoute = app.request.attributes.get('_route') %}
@@ -44,7 +48,9 @@
         </main>
 
         <footer class="site-footer">
-            Informations de la société
+            <div><strong>Nom de la société :</strong> Stubborn</div>
+            <div><strong>Adresse :</strong> Piccadilly Circus, London W1J 0DA, Royaume-Uni</div>
+            <div><strong>Adresse de contact :</strong> stubborn@blabla.com</div>
         </footer>
     </body>
 </html>

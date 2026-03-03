@@ -35,9 +35,25 @@ body {
 
 .logo {
     border: 1px solid #444;
+    min-height: 90px;
+    min-width: 250px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+.logo-img {
+    max-height: 72px;
+    width: auto;
+    max-width: 100%;
+}
+
+.logo-text {
+    display: none;
     font-size: 42px;
     font-weight: 700;
-    padding: 8px 26px;
 }
 
 .slogan {
@@ -106,11 +122,28 @@ body {
     margin-bottom: 16px;
 }
 
+.product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .product-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+}
+
+.product-name {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.product-price {
+    font-size: 22px;
 }
 
 .btn {
@@ -149,6 +182,25 @@ textarea {
     gap: 24px;
 }
 
+.product-detail-image {
+    height: 420px;
+}
+
+.shop-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+}
+
+.filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .cart-item {
     margin-bottom: 12px;
     padding: 12px;
@@ -161,8 +213,28 @@ textarea {
 .cart-summary {
     display: flex;
     justify-content: end;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 16px;
+}
+
+.cart-thumb {
+    height: 110px;
+}
+
+.admin-create {
+    margin-bottom: 20px;
+}
+
+.admin-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.panel-wide {
+    max-width: 860px;
 }
 
 .admin-row {
@@ -181,6 +253,10 @@ textarea {
         grid-template-columns: 1fr;
     }
 
+    .shop-layout {
+        grid-template-columns: 1fr;
+    }
+
     .product-detail {
         grid-template-columns: 1fr;
     }
@@ -190,6 +266,11 @@ textarea {
     }
 
     .logo {
+        min-width: 180px;
+        min-height: 72px;
+    }
+
+    .logo-text {
         font-size: 32px;
     }
 }

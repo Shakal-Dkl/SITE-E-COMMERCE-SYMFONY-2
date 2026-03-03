@@ -3,10 +3,10 @@
 {% block title %}Boutique{% endblock %}
 
 {% block body %}
-    <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;">
+    <div class="shop-layout">
         <aside class="product-card">
             <h3>Fourchette de prix</h3>
-            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
+            <ul class="filter-list">
                 <li><a class="btn" href="{{ path('app_products') }}">Tout</a></li>
                 <li><a class="btn" href="{{ path('app_products', {range: '10-29'}) }}">10 à 29 €</a></li>
                 <li><a class="btn" href="{{ path('app_products', {range: '29-35'}) }}">30 à 35 €</a></li>
@@ -19,15 +19,15 @@
                 <article class="product-card">
                     <div class="product-image">
                         {% if product.imagePath %}
-                            <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" style="max-width:100%;max-height:100%;">
+                            <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" onerror="this.remove(); this.parentElement.textContent='Image produit';">
                         {% else %}
                             Image produit
                         {% endif %}
                     </div>
                     <div class="product-meta">
                         <div>
-                            <div>{{ product.name }}</div>
-                            <div>{{ product.price|number_format(2, ',', ' ') }} €</div>
+                            <div class="product-name">{{ product.name }}</div>
+                            <div class="product-price">{{ product.price|number_format(2, ',', ' ') }} €</div>
                         </div>
                         <a class="btn" href="{{ path('app_product_show', {id: product.id}) }}">VOIR</a>
                     </div>

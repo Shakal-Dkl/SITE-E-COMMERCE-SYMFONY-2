@@ -35,24 +35,24 @@ class AppFixtures extends Fixture
         $manager->persist($client);
 
         $products = [
-            ['Blackbelt', 29.90, true],
-            ['BlueBelt', 29.90, false],
-            ['Street', 34.50, false],
-            ['Pokeball', 45.00, true],
-            ['PinkLady', 29.90, false],
-            ['Snow', 32.00, false],
-            ['Greyback', 28.50, false],
-            ['BlueCloud', 45.00, false],
-            ['BornInUsa', 59.90, true],
-            ['GreenSchool', 42.20, false],
+            ['Blackbelt', 29.90, true, 'images/products/blackbelt.jpeg'],
+            ['BlueBelt', 29.90, false, 'images/products/bluebelt.jpeg'],
+            ['Street', 34.50, false, 'images/products/street.jpeg'],
+            ['Pokeball', 45.00, true, 'images/products/pokeball.jpeg'],
+            ['PinkLady', 29.90, false, 'images/products/pinklady.jpeg'],
+            ['Snow', 32.00, false, 'images/products/snow.jpeg'],
+            ['Greyback', 28.50, false, 'images/products/greyback.jpeg'],
+            ['BlueCloud', 45.00, false, 'images/products/bluecloud.jpeg'],
+            ['BornInUsa', 59.90, true, 'images/products/borninusa.jpeg'],
+            ['GreenSchool', 42.20, false, 'images/products/greenschool.jpeg'],
         ];
 
-        foreach ($products as [$name, $price, $featured]) {
+        foreach ($products as [$name, $price, $featured, $imagePath]) {
             $product = new Product();
             $product->setName($name);
             $product->setPrice($price);
             $product->setFeatured($featured);
-            $product->setImagePath(null);
+            $product->setImagePath($imagePath);
             $product->setStockXs(5);
             $product->setStockS(5);
             $product->setStockM(5);

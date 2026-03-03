@@ -8,15 +8,15 @@
             <article class="product-card">
                 <div class="product-image">
                     {% if product.imagePath %}
-                        <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" style="max-width:100%;max-height:100%;">
+                        <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" onerror="this.remove(); this.parentElement.textContent='Image produit';">
                     {% else %}
                         Image produit
                     {% endif %}
                 </div>
                 <div class="product-meta">
                     <div>
-                        <div>{{ product.name }}</div>
-                        <div>{{ product.price|number_format(2, ',', ' ') }} €</div>
+                        <div class="product-name">{{ product.name }}</div>
+                        <div class="product-price">{{ product.price|number_format(2, ',', ' ') }} €</div>
                     </div>
                     {% if app.user %}
                         <a class="btn" href="{{ path('app_product_show', {id: product.id}) }}">VOIR</a>
