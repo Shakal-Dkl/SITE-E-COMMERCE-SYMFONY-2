@@ -6,7 +6,13 @@
     <section>
         {% for lineKey, item in items %}
             <article class="cart-item">
-                <div class="product-image" style="height:110px;">Image</div>
+                <div class="product-image cart-thumb">
+                    {% if item.product.imagePath %}
+                        <img src="{{ asset(item.product.imagePath) }}" alt="{{ item.product.name }}" onerror="this.remove(); this.parentElement.textContent='Image';">
+                    {% else %}
+                        Image
+                    {% endif %}
+                </div>
                 <div>
                     <div><strong>{{ item.product.name }}</strong></div>
                     <div>Taille : {{ item.size }}</div>
