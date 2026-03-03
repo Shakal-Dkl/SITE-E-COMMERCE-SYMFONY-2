@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Stubborn{% endblock %}</title>
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {% endblock %}
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="logo-wrap">
+                <div class="logo">Stubborn</div>
+                <div class="slogan">Slogan</div>
+            </div>
+
+            {% set currentRoute = app.request.attributes.get('_route') %}
+            <nav class="menu">
+                <a href="{{ path('app_home') }}" class="{{ currentRoute == 'app_home' ? 'active' : '' }}">Accueil</a>
+
+                {% if app.user %}
+                    <a href="{{ path('app_products') }}" class="{{ currentRoute starts with 'app_product' or currentRoute == 'app_products' ? 'active' : '' }}">Boutique</a>
+                    <a href="{{ path('app_cart') }}" class="{{ currentRoute starts with 'app_cart' ? 'active' : '' }}">Panier</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_admin') }}" class="{{ currentRoute starts with 'app_admin' ? 'active' : '' }}">Back-office</a>
+                    {% endif %}
+                    <a href="{{ path('app_logout') }}">Se déconnecter</a>
+                {% else %}
+                    <a href="{{ path('app_register') }}" class="{{ currentRoute == 'app_register' ? 'active' : '' }}">S'inscrire</a>
+                    <a href="{{ path('app_login') }}" class="{{ currentRoute == 'app_login' ? 'active' : '' }}">Se connecter</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <main class="page-wrap">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash flash-{{ label }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            Informations de la société
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+    <div class="panel">
+        <h2>S'inscrire</h2>
+
+        {{ form_start(registrationForm) }}
+            <div class="form-row">{{ form_row(registrationForm.name, {label: 'Nom utilisateur :'}) }}</div>
+            <div class="form-row">{{ form_row(registrationForm.email, {label: 'Adresse mail :'}) }}</div>
+            <div class="form-row">{{ form_row(registrationForm.shippingAddress, {label: 'Adresse de livraison :'}) }}</div>
+            <div class="form-row">{{ form_row(registrationForm.plainPassword.first) }}</div>
+            <div class="form-row">{{ form_row(registrationForm.plainPassword.second) }}</div>
+
+            <button class="btn" type="submit">Créer un compte</button>
+        {{ form_end(registrationForm) }}
+
+        <hr>
+        <p>Déjà inscrit ?</p>
+        <a class="btn" href="{{ path('app_login') }}">Se Connecter</a>
+    </div>
+{% endblock %}

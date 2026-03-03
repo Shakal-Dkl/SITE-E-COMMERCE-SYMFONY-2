@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier produit{% endblock %}
+
+{% block body %}
+    <section class="panel" style="max-width:860px;">
+        <h2>Modifier {{ product.name }}</h2>
+        {{ form_start(form) }}
+            <div class="admin-grid">
+                {{ form_row(form.name) }}
+                {{ form_row(form.price) }}
+                {{ form_row(form.stockXs) }}
+                {{ form_row(form.stockS) }}
+                {{ form_row(form.stockM) }}
+                {{ form_row(form.stockL) }}
+                {{ form_row(form.stockXl) }}
+                {{ form_row(form.imagePath) }}
+            </div>
+            <div class="form-row">{{ form_row(form.featured) }}</div>
+            <button class="btn" type="submit">ENREGISTRER</button>
+            <a class="btn" href="{{ path('app_admin') }}">RETOUR</a>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}
