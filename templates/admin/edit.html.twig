@@ -5,6 +5,15 @@
 {% block body %}
     <section class="panel panel-wide">
         <h2>Modifier {{ product.name }}</h2>
+
+        <div class="admin-edit-image-preview">
+            {% if product.imagePath %}
+                <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" onerror="this.remove(); this.parentElement.textContent='Image';">
+            {% else %}
+                Image
+            {% endif %}
+        </div>
+
         {{ form_start(form) }}
             <div class="admin-grid">
                 {{ form_row(form.name) }}
@@ -14,7 +23,7 @@
                 {{ form_row(form.stockM) }}
                 {{ form_row(form.stockL) }}
                 {{ form_row(form.stockXl) }}
-                {{ form_row(form.imagePath) }}
+                {{ form_row(form.uploadedImage) }}
             </div>
             <div class="form-row">{{ form_row(form.featured) }}</div>
             <button class="btn" type="submit">ENREGISTRER</button>

@@ -3,36 +3,114 @@
 {% block title %}Back-office{% endblock %}
 
 {% block body %}
-    <section class="product-card admin-create">
-        <h2>Back-Office - Ajouter un sweat-shirt</h2>
-        {{ form_start(newProductForm) }}
-            <div class="admin-grid">
-                {{ form_row(newProductForm.name) }}
-                {{ form_row(newProductForm.price) }}
-                {{ form_row(newProductForm.stockXs) }}
-                {{ form_row(newProductForm.stockS) }}
-                {{ form_row(newProductForm.stockM) }}
-                {{ form_row(newProductForm.stockL) }}
-                {{ form_row(newProductForm.stockXl) }}
-                {{ form_row(newProductForm.imagePath) }}
-            </div>
-            <div class="form-row">{{ form_row(newProductForm.featured) }}</div>
-            <button class="btn" type="submit">AJOUTER</button>
-        {{ form_end(newProductForm) }}
-    </section>
+    <section class="admin-board">
+        <h2 class="admin-board-title">Back-Office</h2>
 
-    {% for product in products %}
-        <article class="admin-row">
-            <strong>{{ product.name }}</strong> - {{ product.price|number_format(2, ',', ' ') }} €
-            <div class="admin-actions">
-                <a class="btn" href="{{ path('app_admin_product_edit', {id: product.id}) }}">MODIFIER</a>
-                <form method="post" action="{{ path('app_admin_product_delete', {id: product.id}) }}" onsubmit="return confirm('Supprimer ce produit ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
-                    <button class="btn" type="submit">SUPPRIMER</button>
-                </form>
-            </div>
-        </article>
-    {% else %}
-        <p>Aucun produit.</p>
-    {% endfor %}
+        {{ form_start(newProductForm) }}
+            <article class="admin-wire admin-wire-create">
+                <div class="admin-wire-left">
+                    <div class="admin-wire-image admin-wire-image-large">
+                        Image
+                    </div>
+
+                    <div class="admin-wire-picker">{{ form_row(newProductForm.uploadedImage) }}</div>
+                    <label class="admin-wire-featured">{{ form_widget(newProductForm.featured) }} Produit mis en avant</label>
+                </div>
+
+                <div class="admin-wire-right">
+                    <div class="admin-wire-fields">
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.name, 'Nom') }}
+                            {{ form_widget(newProductForm.name) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.price, 'Prix') }}
+                            {{ form_widget(newProductForm.price) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.stockXs, 'Stock XS') }}
+                            {{ form_widget(newProductForm.stockXs) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.stockS, 'Stock S') }}
+                            {{ form_widget(newProductForm.stockS) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.stockM, 'Stock M') }}
+                            {{ form_widget(newProductForm.stockM) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.stockL, 'Stock L') }}
+                            {{ form_widget(newProductForm.stockL) }}
+                        </div>
+                        <div class="admin-field-wrap">
+                            {{ form_label(newProductForm.stockXl, 'Stock XL') }}
+                            {{ form_widget(newProductForm.stockXl) }}
+                        </div>
+                    </div>
+
+                    <div class="admin-wire-actions admin-wire-actions-create">
+                        <button class="btn admin-wire-btn" type="submit">AJOUTER</button>
+                    </div>
+                </div>
+            </article>
+        {{ form_end(newProductForm) }}
+
+        {% for product in products %}
+            <article class="admin-wire">
+                <div class="admin-wire-left">
+                    <div class="admin-wire-image">
+                        {% if product.imagePath %}
+                            <img src="{{ asset(product.imagePath) }}" alt="{{ product.name }}" onerror="this.remove(); this.parentElement.textContent='Image';">
+                        {% else %}
+                            Image
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="admin-wire-right">
+                    <div class="admin-wire-fields">
+                        <div class="admin-field-wrap">
+                            <label>Nom</label>
+                            <input type="text" value="{{ product.name }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Prix</label>
+                            <input type="text" value="{{ product.price|number_format(2, ',', ' ') }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Stock XS</label>
+                            <input type="text" value="{{ product.stockXs }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Stock S</label>
+                            <input type="text" value="{{ product.stockS }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Stock M</label>
+                            <input type="text" value="{{ product.stockM }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Stock L</label>
+                            <input type="text" value="{{ product.stockL }}" readonly>
+                        </div>
+                        <div class="admin-field-wrap">
+                            <label>Stock XL</label>
+                            <input type="text" value="{{ product.stockXl }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="admin-wire-actions">
+                        <form method="post" action="{{ path('app_admin_product_delete', {id: product.id}) }}" onsubmit="return confirm('Supprimer ce produit ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
+                            <button class="btn admin-wire-btn" type="submit">SUPPRIMER</button>
+                        </form>
+                        <a class="btn admin-wire-btn" href="{{ path('app_admin_product_edit', {id: product.id}) }}">MODIFIER</a>
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <p>Aucun produit.</p>
+        {% endfor %}
+    </section>
 {% endblock %}
