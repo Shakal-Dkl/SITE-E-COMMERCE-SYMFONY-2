@@ -5,18 +5,14 @@ namespace App\Form;
 use App\Entity\Product;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 
 // Formulaire produit utilisé dans le back-office (création + édition).
 class ProductType extends AbstractType
 {
-    public function __construct(private readonly KernelInterface $kernel)
-    {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -24,13 +20,24 @@ class ProductType extends AbstractType
             ->add('price', null, [
                 'label' => 'Prix',
             ])
-            // Le champ image propose les fichiers réellement présents dans public/images/products.
-            ->add('imagePath', ChoiceType::class, [
-                'label' => 'Image produit',
+            // Ce champ ouvre l'explorateur de fichiers pour téléverser une image locale.
+            ->add('uploadedImage', FileType::class, [
+                'label' => 'Télécharger une image',
+                'mapped' => false,
                 'required' => false,
-                'placeholder' => 'Aucune image',
-                'choices' => $this->buildImageChoices(),
-                'help' => 'Liste automatique depuis public/images/products',
+                'help' => 'Formats conseillés : jpg, jpeg, png, webp',
+                'constraints' => [
+                    new File(
+                        maxSize: '2M',
+                        mimeTypes: [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        maxSizeMessage: 'Le fichier est trop volumineux (max 2 Mo).',
+                        mimeTypesMessage: 'Format invalide. Utilise uniquement JPG, PNG ou WEBP.',
+                    ),
+                ],
             ])
             ->add('stockXs')
             ->add('stockS')
@@ -47,30 +54,5 @@ class ProductType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Product::class,
         ]);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function buildImageChoices(): array
-    {
-        $imagesDirectory = $this->kernel->getProjectDir().'/public/images/products';
-        $files = glob($imagesDirectory.'/*.{jpg,jpeg,png,webp}', GLOB_BRACE);
-
-        // Si aucun fichier image n'existe, la liste reste vide.
-        if ($files === false || $files === []) {
-            return [];
-        }
-
-        sort($files);
-        $choices = [];
-
-        foreach ($files as $file) {
-            $fileName = basename($file);
-            // Clé affichée dans la liste / valeur enregistrée en base.
-            $choices[$fileName] = 'images/products/'.$fileName;
-        }
-
-        return $choices;
     }
 }

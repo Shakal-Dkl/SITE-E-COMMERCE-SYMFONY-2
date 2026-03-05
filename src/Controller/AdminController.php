@@ -7,6 +7,8 @@ use App\Form\ProductType;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,6 +28,10 @@ class AdminController extends AbstractController
         $newProductForm->handleRequest($request);
 
         if ($newProductForm->isSubmitted() && $newProductForm->isValid()) {
+            // Si une image est envoyée, on la copie dans public/images/products
+            // et on stocke le chemin web dans l'entité Product.
+            $this->handleProductImageUpload($newProductForm, $newProduct);
+
             // Persist = insertion en base d'un nouveau produit.
             $entityManager->persist($newProduct);
             $entityManager->flush();
@@ -48,6 +54,10 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // En édition, si aucune nouvelle image n'est envoyée,
+            // l'image actuelle du produit est conservée.
+            $this->handleProductImageUpload($form, $product);
+
             // Pas de persist() ici: l'entité existe déjà, on flush simplement les modifications.
             $entityManager->flush();
             $this->addFlash('success', 'Produit modifié.');
@@ -72,5 +82,34 @@ class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin');
+    }
+
+    private function handleProductImageUpload(FormInterface $form, Product $product): void
+    {
+        $uploadedImage = $form->get('uploadedImage')->getData();
+
+        if (!$uploadedImage instanceof UploadedFile) {
+            return;
+        }
+
+        $originalName = pathinfo($uploadedImage->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFileName = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $originalName));
+        $safeFileName = trim($safeFileName, '-');
+
+        if ($safeFileName === '') {
+            $safeFileName = 'product';
+        }
+
+        $extension = $uploadedImage->guessExtension() ?: $uploadedImage->getClientOriginalExtension() ?: 'bin';
+        $newFileName = $safeFileName.'-'.uniqid().'.'.$extension;
+
+        $targetDirectory = $this->getParameter('kernel.project_dir').'/public/images/products';
+
+        if (!is_dir($targetDirectory)) {
+            mkdir($targetDirectory, 0777, true);
+        }
+
+        $uploadedImage->move($targetDirectory, $newFileName);
+        $product->setImagePath('images/products/'.$newFileName);
     }
 }
