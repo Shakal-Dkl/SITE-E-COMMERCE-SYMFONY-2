@@ -9,7 +9,6 @@ use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -41,24 +40,27 @@ class CartController extends AbstractController
 
     #[Route('/cart/checkout', name: 'app_cart_checkout', methods: ['POST'])]
     public function checkout(
-        Request $request,
         CartService $cartService,
         StripeService $stripeService,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $entityManager
     ): RedirectResponse {
         $items = $cartService->getDetailedItems();
 
         // Garde-fou: impossible de lancer un checkout avec un panier vide.
-        if ($items === []) {
+        if (count($items) === 0) {
             $this->addFlash('error', 'Le panier est vide.');
 
             return $this->redirectToRoute('app_cart');
         }
 
         $order = new CustomerOrder();
+        $currentUser = $this->getUser();
+
         // L'utilisateur connecté devient le propriétaire de la commande.
-        $order->setUser($this->getUser());
-        $order->setTotal($cartService->getTotal());
+        $order->setUser($currentUser);
+
+        $cartTotal = $cartService->getTotal();
+        $order->setTotal($cartTotal);
 
         // On fige les lignes de commande (nom, prix unitaire, taille, quantité).
         // Cela évite que l'historique change si le produit est modifié plus tard.
@@ -76,14 +78,18 @@ class CartController extends AbstractController
         $entityManager->flush();
 
         // URLs absolues requises par Stripe pour retour succès/annulation.
-        $successUrl = $this->generateUrl('app_cart_success', ['orderId' => $order->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-        $cancelUrl = $this->generateUrl('app_cart', [], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        $checkout = $stripeService->startCheckout(
-            $items,
-            $successUrl,
-            $cancelUrl,
+        $successUrl = $this->generateUrl(
+            'app_cart_success',
+            ['orderId' => $order->getId()],
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
+        $cancelUrl = $this->generateUrl(
+            'app_cart',
+            [],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+
+        $checkout = $stripeService->startCheckout($items, $successUrl, $cancelUrl);
 
         $order->setStripeSessionId($checkout['sessionId']);
         $entityManager->flush();

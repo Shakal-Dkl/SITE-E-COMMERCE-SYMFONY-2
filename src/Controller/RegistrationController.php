@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 // Contrôleur d'inscription client + validation de l'email.
@@ -37,10 +36,10 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Le mot de passe est toujours hashé avant stockage en base.
-            $user->setPassword($userPasswordHasher->hashPassword(
-                $user,
-                (string) $form->get('plainPassword')->getData()
-            ));
+            $plainPassword = (string) $form->get('plainPassword')->getData();
+            $hashedPassword = $userPasswordHasher->hashPassword($user, $plainPassword);
+
+            $user->setPassword($hashedPassword);
 
             // Dans le contexte de ce projet, un inscrit devient client par défaut.
             $user->setRoles(['ROLE_CLIENT']);
@@ -49,12 +48,13 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
             // Envoi de l'email de confirmation avec lien signé.
-            $emailVerifier->sendEmailConfirmation('app_verify_email', $user, (new TemplatedEmail())
+            $confirmationEmail = (new TemplatedEmail())
                 ->from(new Address('noreply@stubborn.local', 'Stubborn'))
                 ->to((string) $user->getEmail())
                 ->subject('Confirme ton inscription')
-                ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+                ->htmlTemplate('registration/confirmation_email.html.twig');
+
+            $emailVerifier->sendEmailConfirmation('app_verify_email', $user, $confirmationEmail);
 
             $this->addFlash('success', 'Inscription réussie. Vérifie ton e-mail pour activer ton compte.');
 
@@ -70,9 +70,15 @@ class RegistrationController extends AbstractController
     public function verifyUserEmail(Request $request, EntityManagerInterface $entityManager, EmailVerifier $emailVerifier): Response
     {
         // L'ID est transporté dans l'URL signée.
-        $id = $request->query->get('id');
+        $idParam = $request->query->get('id');
 
-        if ($id === null) {
+        if (!is_scalar($idParam)) {
+            return $this->redirectToRoute('app_register');
+        }
+
+        $id = (int) $idParam;
+
+        if ($id <= 0) {
             return $this->redirectToRoute('app_register');
         }
 
