@@ -1,4 +1,4 @@
-# Stubborn - Guide débutant
+# Stubborn - Guide
 
 Ce projet est un site e-commerce Symfony avec :
 - inscription / connexion,
