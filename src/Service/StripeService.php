@@ -34,14 +34,18 @@ class StripeService
         // Construction des lignes attendues par l'API Stripe Checkout.
         foreach ($items as $item) {
             $product = $item['product'];
+            $quantity = (int) $item['quantity'];
+            $unitPrice = (float) $product->getPrice();
+            $unitAmountInCents = (int) round($unitPrice * 100);
+            $productNameWithSize = $product->getName().' - Taille '.$item['size'];
 
             $lineItems[] = [
-                'quantity' => $item['quantity'],
+                'quantity' => $quantity,
                 'price_data' => [
                     'currency' => 'eur',
-                    'unit_amount' => (int) round(((float) $product->getPrice()) * 100),
+                    'unit_amount' => $unitAmountInCents,
                     'product_data' => [
-                        'name' => $product->getName().' - Taille '.$item['size'],
+                        'name' => $productNameWithSize,
                     ],
                 ],
             ];

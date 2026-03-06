@@ -86,29 +86,51 @@ class AdminController extends AbstractController
 
     private function handleProductImageUpload(FormInterface $form, Product $product): void
     {
+        // Le champ est non mappé, on récupère donc le fichier directement depuis le formulaire.
         $uploadedImage = $form->get('uploadedImage')->getData();
 
         if (!$uploadedImage instanceof UploadedFile) {
             return;
         }
 
+        // 1) On prépare un nom de base propre à partir du nom original.
         $originalName = pathinfo($uploadedImage->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeFileName = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $originalName));
+
+        $safeFileName = preg_replace('/[^a-zA-Z0-9]+/', '-', $originalName);
+
+        if (!is_string($safeFileName)) {
+            $safeFileName = '';
+        }
+
+        $safeFileName = strtolower($safeFileName);
         $safeFileName = trim($safeFileName, '-');
 
         if ($safeFileName === '') {
             $safeFileName = 'product';
         }
 
-        $extension = $uploadedImage->guessExtension() ?: $uploadedImage->getClientOriginalExtension() ?: 'bin';
+        // 2) On détermine l'extension.
+        $extension = $uploadedImage->guessExtension();
+
+        if (!$extension) {
+            $extension = $uploadedImage->getClientOriginalExtension();
+        }
+
+        if (!$extension) {
+            $extension = 'bin';
+        }
+
+        // 3) On fabrique un nom final unique.
         $newFileName = $safeFileName.'-'.uniqid().'.'.$extension;
 
         $targetDirectory = $this->getParameter('kernel.project_dir').'/public/images/products';
 
+        // 4) On crée le dossier s'il n'existe pas.
         if (!is_dir($targetDirectory)) {
             mkdir($targetDirectory, 0777, true);
         }
 
+        // 5) On déplace le fichier sur le serveur et on enregistre son chemin web.
         $uploadedImage->move($targetDirectory, $newFileName);
         $product->setImagePath('images/products/'.$newFileName);
     }

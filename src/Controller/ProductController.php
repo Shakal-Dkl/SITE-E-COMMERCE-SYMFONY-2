@@ -19,8 +19,14 @@ class ProductController extends AbstractController
     public function index(Request $request, ProductRepository $productRepository): Response
     {
         // Le filtre de prix est passé en query string (?range=...).
-        $range = $request->query->get('range');
-        $products = $productRepository->findByPriceRange(is_string($range) ? $range : null);
+        $rangeParam = $request->query->get('range');
+        $range = null;
+
+        if (is_string($rangeParam)) {
+            $range = $rangeParam;
+        }
+
+        $products = $productRepository->findByPriceRange($range);
 
         return $this->render('product/index.html.twig', [
             'products' => $products,
@@ -38,7 +44,9 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // On délègue la logique panier au service dédié (pas au contrôleur).
             $size = (string) $form->get('size')->getData();
-            $cartService->add((int) $product->getId(), $size);
+            $productId = (int) $product->getId();
+
+            $cartService->add($productId, $size);
             $this->addFlash('success', 'Produit ajouté au panier.');
 
             return $this->redirectToRoute('app_cart');
